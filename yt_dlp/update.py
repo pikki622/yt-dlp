@@ -106,10 +106,10 @@ _NON_UPDATEABLE_REASONS = {
 
 
 def is_non_updateable():
-    if UPDATE_HINT:
-        return UPDATE_HINT
-    return _NON_UPDATEABLE_REASONS.get(
-        detect_variant(), _NON_UPDATEABLE_REASONS['unknown' if VARIANT else 'other'])
+    return UPDATE_HINT or _NON_UPDATEABLE_REASONS.get(
+        detect_variant(),
+        _NON_UPDATEABLE_REASONS['unknown' if VARIANT else 'other'],
+    )
 
 
 def _sha256_file(path):
@@ -277,8 +277,7 @@ class Updater:
         """Update yt-dlp executable to the latest version"""
         if not self.check_update():
             return
-        err = is_non_updateable()
-        if err:
+        if err := is_non_updateable():
             return self._report_error(err, True)
         self.ydl.to_screen(f'Updating to {self._label(self.target_channel, self.new_version)} ...')
         if (_VERSION_RE.fullmatch(self.target_tag[5:])
